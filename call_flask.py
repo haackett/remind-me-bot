@@ -27,10 +27,11 @@ def post_todo(text, dependent_users):
         print('Uh oh! Something went wrong: ' + str(response.status_code))
         return('Uh oh! Something went wrong: ' + str(response.status_code))
 
-def put_todo(todo_id, completed): 
+def put_todo(todo_id, completed=None, text=None): 
     int_todo_id = base62.decode(todo_id)
     put_body = {}
     put_body['completed'] = completed
+    put_body['text'] = text
     headers = {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}
 
     response = requests.put(API_URL + '/todos/' + str(int_todo_id), data=json.dumps(put_body), headers=headers)

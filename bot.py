@@ -4,12 +4,12 @@ import asyncio
 import call_flask
 import makepretty
 from datetime import datetime
+import os
 
 
 
 
-
-
+CLIENT_SECRET = os.environ['CLIENT_SECRET']
 bot = commands.Bot(command_prefix='$')
 
 @bot.event
@@ -59,7 +59,7 @@ async def completetodo(ctx, todo_id, completed):
         if completed in ['true', 'True', '1', 'complete', 'completed']:
             completed = True
             print(todo_id, completed)
-            await ctx.send(makepretty.todo_put_response_to_string(call_flask.put_todo(todo_id, completed)))
+            await ctx.send(makepretty.todo_put_response_to_string(call_flask.put_todo(todo_id, completed=completed)))
         elif completed in ['false', 'False', '0', 'incomplete', 'incompleted']:
             completed = False
             print(todo_id, completed)
@@ -68,6 +68,16 @@ async def completetodo(ctx, todo_id, completed):
             await ctx.send('Request invalid: <completed> is true or false?')
     except Exception as e:
         await ctx.send('Request invalid: ' + str(e))
+
+@bot.command(pass_context=True, breif='edits the text of a todo <text>')
+async def edittodo(ctx, *args):
+    text = ''
+    todo_id = args[0]
+    del args[0]
+    for arg in args:
+        text += arg + ' '
+    print(todo_id, text)
+    await ctx.send(makepretty.todo_put_response_to_string(call_flask.put_todo(todo_id, text=text)))
 
 @bot.command(pass_context=True, brief='gets todos with mentions')
 async def pingtodos(ctx):
@@ -103,4 +113,4 @@ async def ping_todos():
 
 
 bot.loop.create_task(ping_todos())
-bot.run('Nzg0MTMzMjM4OTcyMDg4MzMx.X8k2_A.mphfyeL4CwCYakQPuU68QUZPs1k')
+bot.run(CLIENT_SECRET)
