@@ -3,6 +3,8 @@ from discord.ext import commands
 import asyncio
 import call_flask
 import makepretty
+import pathlib
+from random import randint
 from datetime import datetime
 import os
 
@@ -10,6 +12,8 @@ import os
 
 
 CLIENT_SECRET = os.environ['CLIENT_SECRET']
+IMAGE_PATH = str(pathlib.Path.cwd()) + '/grippos/'
+
 bot = commands.Bot(command_prefix='$')
 
 @bot.event
@@ -90,17 +94,18 @@ async def deltodo(ctx, todo_id):
 
 @bot.command(pass_context=True, brief='gives grippos')
 async def grippos(ctx):
-    await ctx.send('I am running out of bags ... :pensive:')
-    await ctx.send(file=discord.File('img_grippos.png'))
+    choice = randint(1, 3)
+    await ctx.send(file=discord.File(IMAGE_PATH + str(choice) + ".png"))
 
 async def ping_todos():
     await bot.wait_until_ready()
     while not bot.is_closed():
         try:
             channel = bot.get_channel(784616083835060255)
-            now = datetime.now()
+            now = datetime.utcnow()
+            offset = -4
             print('Checking if it is 8:00...')
-            if (now.hour == 8 or now.hour == 20) and (now.minute == 0):
+            if (now.hour == 8 + offset or now.hour == 20 + offset) and (now.minute == 0):
                 print('It is 8. Sending...')
                 await channel.send(makepretty.todo_json_to_string_with_mentions(call_flask.get_todos()))
             else:
