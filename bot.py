@@ -8,9 +8,6 @@ from random import randint
 from datetime import datetime
 import os
 
-
-
-
 CLIENT_SECRET = os.environ['CLIENT_SECRET']
 IMAGE_PATH = str(pathlib.Path.cwd()) + '/grippos/'
 
@@ -39,6 +36,11 @@ async def gettodos(ctx, view='all'):
         await ctx.send(makepretty.todo_json_to_string(json, view=view))
     else:
         await ctx.send('Request invalid. Please refer to help.')
+
+@bot.command(pass_context=True, brief='gets todos with mentions')
+async def pingtodos(ctx):
+    json = call_flask.get_todos()
+    await ctx.send(makepretty.todo_json_to_string_with_mentions(json))
 
 @bot.command(pass_context=True, brief='adds a todo <user ... user> <text>')
 async def addtodo(ctx, *args):
@@ -83,11 +85,6 @@ async def edittodo(ctx, *args):
     print(todo_id, text)
     await ctx.send(makepretty.todo_put_response_to_string(call_flask.put_todo(todo_id, text=text)))
 
-@bot.command(pass_context=True, brief='gets todos with mentions')
-async def pingtodos(ctx):
-    json = call_flask.get_todos()
-    await ctx.send(makepretty.todo_json_to_string_with_mentions(json))
-
 @bot.command(pass_context=True, brief='deletes a todo <todo_id>')
 async def deltodo(ctx, todo_id):
     await ctx.send(makepretty.todo_delete_response_to_string(call_flask.delete_todo(todo_id)))
@@ -104,18 +101,14 @@ async def ping_todos():
             channel = bot.get_channel(784616083835060255)
             now = datetime.utcnow()
             offset = -4
-            print('Checking if it is 8:00...')
             if (now.hour == 8 + offset or now.hour == 20 + offset) and (now.minute == 0):
-                print('It is 8. Sending...')
                 await channel.send(makepretty.todo_json_to_string_with_mentions(call_flask.get_todos()))
             else:
-                print('It is not 8.')
+                pass
             await asyncio.sleep(delay=60)
             
         except Exception as e:
             print(e)
-
-
 
 bot.loop.create_task(ping_todos())
 bot.run(CLIENT_SECRET)
